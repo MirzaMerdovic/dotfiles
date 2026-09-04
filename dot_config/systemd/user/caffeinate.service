@@ -1,0 +1,6 @@
+[Unit]
+Description=Keep workstation awake
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/systemd-inhibit --what=idle:sleep --mode=block --who=caffeinate --why="Development session" /usr/bin/sleep infinity

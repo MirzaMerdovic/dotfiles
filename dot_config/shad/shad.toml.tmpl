@@ -1,0 +1,18 @@
+# ~/.config/shad/shad.toml
+
+[defaults]
+# Which side opencode occupies. The git+bash bundle takes the opposite side.
+# Allowed values: top | bottom | left
+# oc_position = "top"
+
+# How much of the window the git+bash bundle takes (%).
+# panel_percent = 35
+
+# How much of the bundle gitui takes (%). Bash gets the rest.
+# split_percent = 35
+
+
+[projects.tin.shad]
+path = "{{ .chezmoi.homeDir }}/src/tin/shad"
+session = "tin-shad"
+

@@ -62,6 +62,12 @@ Apply these rules to text output, code discussions, architecture reviews, commit
 - Report relevant failures directly.
 - Do not hide or minimize failing checks.
 
+### Shell Scripts
+
+- When modifying shell scripts, run ShellCheck on the changed scripts.
+- Run `shfmt` in check or diff mode when practical.
+- Do not report shell-script verification as successful unless those checks were run successfully.
+
 ## Commit Messages and PR Summaries
 
 - Start commit messages with an imperative verb such as `Add`, `Fix`, `Update`, `Remove`, or `Refactor`.

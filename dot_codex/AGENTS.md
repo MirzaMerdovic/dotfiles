@@ -67,6 +67,12 @@ Apply Simplified Technical English (STE) principles where practical. Do not enfo
 - Report relevant failures directly.
 - Do not hide or minimize failing checks.
 
+### Shell Scripts
+
+- When modifying shell scripts, run ShellCheck on the changed scripts.
+- Run `shfmt` in check or diff mode when practical.
+- Do not report shell-script verification as successful unless those checks were run successfully.
+
 ## Git Safety
 
 - MUST NOT add Codex, OpenAI, AI, generated-by, co-author, or similar attribution to commits or pull request descriptions.

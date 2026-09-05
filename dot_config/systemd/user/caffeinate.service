@@ -1,6 +1,10 @@
 [Unit]
-Description=Keep workstation awake
+Description=Keep workstation awake and unlocked
+PartOf=graphical-session.target
+After=graphical-session.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/systemd-inhibit --what=idle:sleep --mode=block --who=caffeinate --why="Development session" /usr/bin/sleep infinity
+ExecStart=/usr/bin/systemd-inhibit --what=idle:sleep --mode=block --who=caffeinate --why="Development session" /usr/bin/gnome-session-inhibit --app-id=caffeinate --reason="Development session" --inhibit=idle --inhibit=suspend --inhibit-only
+Restart=on-failure
+RestartSec=2

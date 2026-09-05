@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+sudo timedatectl set-local-rtc 0
+sudo systemctl enable --now chronyd
+sudo chronyc online
+sudo chronyc burst 4/4
+sudo chronyc makestep
+
+timedatectl
+chronyc tracking
+

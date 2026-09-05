@@ -28,7 +28,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$HOME/.claude/hooks/block-remote-main-push.py\""
+            "command": "\"$HOME/.local/libexec/agent-guards/block-remote-main-push.py\""
           }
         ]
       }

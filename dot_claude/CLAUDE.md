@@ -53,6 +53,18 @@ Apply these rules to text output, code discussions, architecture reviews, commit
 - Prefer existing project tooling and dependencies over introducing new ones.
 - Surface destructive, irreversible, security-sensitive, or production-impacting operations before performing them.
 
+### Code Comments
+
+- A comment MUST describe current behavior, or the reason the current implementation is required.
+- A comment MUST NOT describe change history, for example "this logic was duplicated in three places".
+- A comment MUST NOT describe the decision-making process, for example alternatives considered or refactoring steps performed.
+- A comment MUST NOT reference the task, request, or conversation that produced the change.
+- A comment MUST NOT restate the code in prose.
+- Do not add a comment that marks a change, for example "new", "updated", "moved here", or "keep for compatibility" without a stated reason.
+- Keep a comment that records a non-obvious constraint, an external requirement, or a defect workaround. Reference the source, for example an issue ID or a specification section.
+- Put change rationale in the commit message or the pull request description.
+- Do not add or reformat comments in code that the requested change does not modify.
+
 ## Verification
 
 - Verify changes with the most relevant available tests, type checks, linters, builds, or runtime checks.

@@ -87,35 +87,37 @@ Verify:
 chezmoi --version
 ```
 
-### 3. Clone the repository
-
-This workstation uses a non-default chezmoi source directory. Clone the repository to that location:
+### 3. Initialize chezmoi
 
 ```bash
-git clone https://github.com/MirzaMerdovic/dotfiles.git ~/src/mm/dotfiles
+chezmoi init --source=~/src/mm/dotfiles https://github.com/MirzaMerdovic/dotfiles.git
 ```
 
-Do not run `chezmoi init`. It clones to `~/.local/share/chezmoi`, which this setup does not use.
+`--source` sets both the clone location and the chezmoi source directory. Any path works. `~/src/mm/dotfiles` is an example. Omit `--source` to use the chezmoi default, `~/.local/share/chezmoi`.
 
-### 4. Run the bootstrap script
-
-```bash
-cd ~/src/mm/dotfiles
-./bootstrap.sh
-```
-
-The script performs two actions:
-
-- It writes `~/.config/chezmoi/chezmoi.toml` and sets `sourceDir` to the clone location. An existing file is left unchanged.
-- It installs the CLI tools that mise does not manage.
-
-The tool installation requires `curl`, `jq`, `sha256sum`, `python3`, and `install`. Install any missing command at host level before running the script.
+The repository contains `.chezmoi.toml.tmpl`. chezmoi renders it during `init` and writes the chosen location to `~/.config/chezmoi/chezmoi.toml`. Later chezmoi commands require no `--source` flag.
 
 Verify the source directory:
 
 ```bash
 chezmoi source-path
 ```
+
+Re-run `chezmoi init --source=<new path>` after moving the clone. The recorded path is absolute.
+
+### 4. Run the bootstrap script
+
+```bash
+cd "$(chezmoi source-path)"
+./bootstrap.sh
+```
+
+The script performs two actions:
+
+- It runs `chezmoi init` to keep the recorded source directory current.
+- It installs the CLI tools that mise does not manage.
+
+The tool installation requires `curl`, `jq`, `sha256sum`, `python3`, and `install`. Install any missing command at host level before running the script.
 
 ### 5. Apply the dotfiles
 

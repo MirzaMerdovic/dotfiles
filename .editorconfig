@@ -1,0 +1,8 @@
+root = true
+
+[*.sh]
+indent_style = tab
+
+[dot_bashrc.d/*.sh]
+indent_style = space
+indent_size = 4

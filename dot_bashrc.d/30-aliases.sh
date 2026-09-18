@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Bash
 alias brcrld='source ~/.bashrc'
 alias brcedit='nano ~/.bashrc'
@@ -12,4 +13,3 @@ alias ..='cd ..'
 alias ...='cd ../..'
 
 # Git
-

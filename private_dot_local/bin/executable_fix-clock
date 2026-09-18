@@ -5,8 +5,17 @@ sudo timedatectl set-local-rtc 0
 sudo systemctl enable --now chronyd
 sudo chronyc online
 sudo chronyc burst 4/4
+
+# burst returns when the measurements are requested, not when they complete, so
+# makestep would otherwise step the clock using the previous measurements. The
+# arguments are max-tries, max-correction, max-skew, and interval. A zero
+# correction or skew is not checked, and the default interval is 10 seconds, so
+# both are given to bound the wait to roughly 10 seconds. See chronyc(1).
+if ! chronyc waitsync 10 0 0 1; then
+	printf 'warning: chronyd did not synchronise within 10 seconds\n' >&2
+fi
+
 sudo chronyc makestep
 
 timedatectl
 chronyc tracking
-

@@ -171,5 +171,12 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    # A hook exit status other than 2 is a non-blocking error, so the tool call
+    # proceeds. Any failure to inspect the payload must therefore exit 2.
+    # block() raises SystemExit, which derives from BaseException and is not
+    # caught here.
+    try:
+        main()
+    except Exception as error:
+        block(f"Could not inspect the hook payload: {type(error).__name__}: {error}")
 

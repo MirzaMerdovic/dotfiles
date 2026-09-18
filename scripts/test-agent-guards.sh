@@ -30,6 +30,23 @@ run_guard() {
 	return "$status"
 }
 
+# Records the result of one check.
+assert_status() {
+	local expected="$1"
+	local actual="$2"
+	local label="$3"
+
+	checks=$((checks + 1))
+
+	if [[ "$actual" -ne "$expected" ]]; then
+		failures=$((failures + 1))
+		printf 'FAIL expected %s, got %s: %s\n' "$expected" "$actual" "$label" >&2
+		return 0
+	fi
+
+	printf 'ok   %s: %s\n' "$expected" "$label"
+}
+
 # Asserts the guard exit code for a Bash tool command.
 expect() {
 	local expected="$1"
@@ -43,17 +60,22 @@ expect() {
 			"$command"
 	)"
 
-	checks=$((checks + 1))
+	run_guard "$payload" || status=$?
+
+	assert_status "$expected" "$status" "$command"
+}
+
+# Asserts the guard exit code for a payload the hook did not necessarily
+# produce.
+expect_payload() {
+	local expected="$1"
+	local label="$2"
+	local payload="$3"
+	local status=0
 
 	run_guard "$payload" || status=$?
 
-	if [[ "$status" -ne "$expected" ]]; then
-		failures=$((failures + 1))
-		printf 'FAIL expected %s, got %s: %s\n' "$expected" "$status" "$command" >&2
-		return 0
-	fi
-
-	printf 'ok   %s: %s\n' "$expected" "$command"
+	assert_status "$expected" "$status" "$label"
 }
 
 # Destinations that resolve to remote main.
@@ -105,6 +127,22 @@ expect "$ALLOWED" 'git push origin HEAD:refs/heads/feature'
 expect "$ALLOWED" 'git status'
 expect "$ALLOWED" 'git commit -m "update main"'
 expect "$ALLOWED" 'ls'
+
+# A payload the guard cannot inspect must fail closed. An exit status other
+# than 2 is a non-blocking error and lets the tool call proceed.
+expect_payload "$BLOCKED" 'null tool_input' '{"tool_input":null}'
+expect_payload "$BLOCKED" 'empty stdin' ''
+expect_payload "$BLOCKED" 'non-JSON stdin' 'not json'
+expect_payload "$BLOCKED" 'truncated JSON' '{"tool_input":'
+expect_payload "$BLOCKED" 'JSON array' '[]'
+expect_payload "$BLOCKED" 'JSON null' 'null'
+expect_payload "$BLOCKED" 'string tool_input' '{"tool_input":"str"}'
+expect_payload "$BLOCKED" 'non-string command' '{"tool_input":{"command":123}}'
+
+# A well-formed payload that carries no command is not a push.
+expect_payload "$ALLOWED" 'empty object' '{}'
+expect_payload "$ALLOWED" 'absent command' '{"tool_input":{}}'
+expect_payload "$ALLOWED" 'null command' '{"tool_input":{"command":null}}'
 
 printf '\n%s checks, %s failures\n' "$checks" "$failures"
 

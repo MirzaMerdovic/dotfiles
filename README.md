@@ -38,7 +38,8 @@ The repository includes configuration for:
 - Claude Code
 - Codex
 - zoxide
-- Bash completion files
+
+Bash completions are generated from the installed binary at shell start, by a snippet in `~/.bashrc.d`. No completion script is committed. A committed script is a copy that drifts from the CLI it completes.
 
 The repository also contains shared agent safety configuration used by Claude Code and Codex.
 

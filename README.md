@@ -33,7 +33,7 @@ The repository includes configuration for:
 - tmux
 - mise
 - Zed
-- shad
+- shad (bash completion only)
 - systemd user services
 - Claude Code
 - Codex
@@ -58,6 +58,8 @@ Examples include:
 ```
 
 Caches, logs, browser profiles, desktop state, and downloaded application packages are also intentionally excluded.
+
+`~/.config/shad/shad.toml` is also not managed. It holds a machine-specific project list.
 
 ## New Workstation Bootstrap
 
@@ -85,12 +87,39 @@ Verify:
 chezmoi --version
 ```
 
-### 3. Apply the dotfiles
+### 3. Clone the repository
 
-Initialize chezmoi from this repository:
+This workstation uses a non-default chezmoi source directory. Clone the repository to that location:
 
 ```bash
-chezmoi init https://github.com/MirzaMerdovic/dotfiles.git
+git clone https://github.com/MirzaMerdovic/dotfiles.git ~/src/mm/dotfiles
+```
+
+Do not run `chezmoi init`. It clones to `~/.local/share/chezmoi`, which this setup does not use.
+
+### 4. Run the bootstrap script
+
+```bash
+cd ~/src/mm/dotfiles
+./bootstrap.sh
+```
+
+The script performs two actions:
+
+- It writes `~/.config/chezmoi/chezmoi.toml` and sets `sourceDir` to the clone location. An existing file is left unchanged.
+- It installs the CLI tools that mise does not manage.
+
+The tool installation requires `curl`, `jq`, `sha256sum`, `python3`, and `install`. Install any missing command at host level before running the script.
+
+Verify the source directory:
+
+```bash
+chezmoi source-path
+```
+
+### 5. Apply the dotfiles
+
+```bash
 chezmoi diff
 chezmoi apply
 ```
@@ -103,7 +132,7 @@ Start a new shell after applying:
 exec bash
 ```
 
-### 4. Install mise
+### 6. Install mise
 
 Install mise using its official installer.
 
@@ -126,7 +155,7 @@ mise doctor
 mise ls
 ```
 
-### 5. Restore Machine-Local Authentication
+### 7. Restore Machine-Local Authentication
 
 Authentication is intentionally not stored in this repository.
 

@@ -297,6 +297,14 @@ Claude's default engineering persona is stored in:
 ~/.claude/output-styles/pragmatic-engineer.md
 ```
 
+Global Claude Code skills are stored in:
+
+```text
+~/.claude/skills/
+```
+
+The `doc-style` skill applies the `Communication Style` and `Documentation` rules from `~/.claude/CLAUDE.md`. Both files are managed here, so the skill and the rules it implements stay in one repository.
+
 Global Codex instructions are stored in:
 
 ```text

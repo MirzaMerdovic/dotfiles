@@ -27,6 +27,15 @@ for command in curl jq sha256sum python3 install; do
 	require_command "$command"
 done
 
+# Proton publishes no checksum and no signature for install.sh. The paths
+# install.sh.sha256, install.sh.asc, and install.sh.sig all return the
+# installer itself. The TLS connection to proton.me is the only integrity
+# control for this download.
+#
+# The risk is accepted. The installer verifies the pass-cli binary against the
+# SHA-256 in the manifest at https://proton.me/download/pass-cli/versions.json.
+# The manifest and the binary share one origin. That check detects a corrupted
+# download. It does not detect a compromise of proton.me.
 install_proton_pass() {
 	if command -v pass-cli >/dev/null 2>&1; then
 		printf 'Proton Pass CLI already installed: '
@@ -81,6 +90,8 @@ install_bws() {
 
 	local releases_json="${tmp_dir}/bitwarden-releases.json"
 
+	# Unauthenticated api.github.com requests are rate limited to 60 per hour
+	# per source address.
 	curl \
 		--fail \
 		--silent \
@@ -90,11 +101,17 @@ install_bws() {
 		"https://api.github.com/repos/${BITWARDEN_REPO}/releases?per_page=100" \
 		--output "$releases_json"
 
+	# The repository publishes several product lines, so the response mixes
+	# bws, bws-cli, python, rust, napi, and dotnet tags. List position does not
+	# imply recency, so select the newest release by created_at.
 	local tag
 	tag="$(
 		jq -r '
-			map(select(.tag_name | startswith("bws-v")))
-			| first
+			map(select(.draft | not))
+			| map(select(.prerelease | not))
+			| map(select(.tag_name | startswith("bws-v")))
+			| sort_by(.created_at)
+			| last
 			| .tag_name // empty
 		' "$releases_json"
 	)"

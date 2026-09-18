@@ -4,10 +4,50 @@ import json
 import shlex
 import sys
 
+# A branch name may not contain '~' or '^', so either character always starts a
+# revision suffix. See gitrevisions(7) and git-check-ref-format(1).
+REVISION_SUFFIX_CHARS = "~^"
+
+# Git global options that take the following argument as their value. An option
+# missing from this set would hide the subcommand behind its value. The '=' forms
+# need no entry because they are a single token. See git(1).
+GIT_GLOBAL_OPTIONS_WITH_VALUE = {
+    "-C",
+    "-c",
+    "--git-dir",
+    "--work-tree",
+    "--namespace",
+    "--super-prefix",
+    "--config-env",
+    "--attr-source",
+}
+
+# Destinations that name the checked-out branch instead of an explicit ref.
+# Committing to local main is permitted, so these may resolve to main.
+UNRESOLVED_DESTINATIONS = {"", "HEAD", "@"}
+
 
 def block(reason: str) -> None:
     print(f"Blocked: {reason}", file=sys.stderr)
     raise SystemExit(2)
+
+
+def normalize_destination(destination: str) -> str:
+    destination = destination.removeprefix("refs/heads/")
+
+    suffix_index = next(
+        (
+            index
+            for index, char in enumerate(destination)
+            if char in REVISION_SUFFIX_CHARS
+        ),
+        None,
+    )
+
+    if suffix_index is not None:
+        destination = destination[:suffix_index]
+
+    return destination.split("@{", 1)[0]
 
 
 def check_push(args: list[str]) -> None:
@@ -76,10 +116,35 @@ def check_push(args: list[str]) -> None:
         else:
             destination = refspec
 
-        destination = destination.removeprefix("refs/heads/")
+        destination = normalize_destination(destination)
+
+        if destination in UNRESOLVED_DESTINATIONS:
+            block(
+                "Claude Code must name the destination branch explicitly when "
+                "pushing. A HEAD or @ destination resolves to the checked-out "
+                "branch, which may be main."
+            )
 
         if destination == "main":
             block("Claude Code may not push, delete, force-push, or otherwise update remote main.")
+
+
+def find_subcommand(tokens: list[str], start: int) -> int | None:
+    index = start
+
+    while index < len(tokens):
+        token = tokens[index]
+
+        if not token.startswith("-"):
+            return index
+
+        if token in GIT_GLOBAL_OPTIONS_WITH_VALUE:
+            index += 2
+            continue
+
+        index += 1
+
+    return None
 
 
 def inspect_segment(tokens: list[str]) -> bool:
@@ -87,12 +152,12 @@ def inspect_segment(tokens: list[str]) -> bool:
         if token != "git":
             continue
 
-        try:
-            push_index = tokens.index("push", git_index + 1)
-        except ValueError:
+        subcommand_index = find_subcommand(tokens, git_index + 1)
+
+        if subcommand_index is None or tokens[subcommand_index] != "push":
             continue
 
-        check_push(tokens[push_index + 1 :])
+        check_push(tokens[subcommand_index + 1 :])
         return True
 
     return False
@@ -138,5 +203,12 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    # A hook exit status other than 2 is a non-blocking error, so the tool call
+    # proceeds. Any failure to inspect the payload must therefore exit 2.
+    # block() raises SystemExit, which derives from BaseException and is not
+    # caught here.
+    try:
+        main()
+    except Exception as error:
+        block(f"Could not inspect the hook payload: {type(error).__name__}: {error}")
 

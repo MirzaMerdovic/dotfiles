@@ -13,9 +13,6 @@
     "metrics": false,
     "anthropic_retention": false
   },
-  "session": {
-    "trust_all_worktrees": true
-  },
   "agent_servers": {
     "codex-acp": {
       "type": "registry"

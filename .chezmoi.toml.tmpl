@@ -2,3 +2,11 @@ sourceDir = {{ .chezmoi.sourceDir | quote }}
 
 [diff]
 command = "delta"
+
+# The git identity is per person, so it is not committed. chezmoi init prompts
+# for both values and stores them in ~/.config/chezmoi/chezmoi.toml. A
+# non-interactive init accepts the defaults below, which are placeholders that
+# MUST be replaced.
+[data.git]
+name = {{ promptStringOnce . "git.name" "Git user name" "Your Name" | quote }}
+email = {{ promptStringOnce . "git.email" "Git email address" "you@example.invalid" | quote }}

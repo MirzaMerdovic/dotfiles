@@ -117,6 +117,23 @@ chezmoi init --source=~/src/mm/dotfiles https://github.com/MirzaMerdovic/dotfile
 
 The repository contains `.chezmoi.toml.tmpl`. chezmoi renders it during `init` and writes the chosen location to `~/.config/chezmoi/chezmoi.toml`. Later chezmoi commands require no `--source` flag.
 
+`init` also prompts for the git identity:
+
+```text
+Git user name
+Git email address
+```
+
+The answers are stored in `~/.config/chezmoi/chezmoi.toml` and render `~/.config/git/config`. The identity is not committed, so a different person can install this repository without inheriting another person's name and address.
+
+A non-interactive `init` accepts the defaults, `Your Name` and `you@example.invalid`. Both are placeholders. Replace them:
+
+```bash
+chezmoi init --promptString git.name='Your Name' --promptString git.email='you@example.com'
+```
+
+`chezmoi init` re-prompts only for values that `~/.config/chezmoi/chezmoi.toml` does not already hold, so it is safe to re-run.
+
 Verify the source directory:
 
 ```bash

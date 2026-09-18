@@ -90,6 +90,8 @@ install_bws() {
 
 	local releases_json="${tmp_dir}/bitwarden-releases.json"
 
+	# Unauthenticated api.github.com requests are rate limited to 60 per hour
+	# per source address.
 	curl \
 		--fail \
 		--silent \
@@ -99,11 +101,17 @@ install_bws() {
 		"https://api.github.com/repos/${BITWARDEN_REPO}/releases?per_page=100" \
 		--output "$releases_json"
 
+	# The repository publishes several product lines, so the response mixes
+	# bws, bws-cli, python, rust, napi, and dotnet tags. List position does not
+	# imply recency, so select the newest release by created_at.
 	local tag
 	tag="$(
 		jq -r '
-			map(select(.tag_name | startswith("bws-v")))
-			| first
+			map(select(.draft | not))
+			| map(select(.prerelease | not))
+			| map(select(.tag_name | startswith("bws-v")))
+			| sort_by(.created_at)
+			| last
 			| .tag_name // empty
 		' "$releases_json"
 	)"

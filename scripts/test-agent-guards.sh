@@ -128,6 +128,29 @@ expect "$ALLOWED" 'git status'
 expect "$ALLOWED" 'git commit -m "update main"'
 expect "$ALLOWED" 'ls'
 
+# 'push' outside the subcommand position does not push anything.
+expect "$ALLOWED" 'git stash push -m wip'
+expect "$ALLOWED" 'git stash push'
+expect "$ALLOWED" 'git log --grep push'
+expect "$ALLOWED" 'git config --get push.default'
+expect "$ALLOWED" 'git help push'
+expect "$ALLOWED" 'git branch --list push'
+
+# A global option before the subcommand must not hide a push.
+expect "$BLOCKED" 'git -C /tmp/repo push origin main'
+expect "$BLOCKED" 'git -c user.name=x push origin main'
+expect "$BLOCKED" 'git --git-dir=/tmp/repo/.git push origin main'
+expect "$BLOCKED" 'git --git-dir /tmp/repo/.git push origin main'
+expect "$BLOCKED" 'git --work-tree /tmp/repo push origin main'
+expect "$BLOCKED" 'git --namespace ns push origin main'
+expect "$BLOCKED" 'git --no-pager push origin main'
+expect "$BLOCKED" 'git -C /tmp/repo -c user.name=x push origin main'
+expect "$BLOCKED" 'git --exec-path push origin main'
+expect "$BLOCKED" 'git --exec-path=/usr/lib/git-core push origin main'
+expect "$BLOCKED" 'env GIT_TRACE=1 git push origin main'
+expect "$ALLOWED" 'git -C /tmp/repo push origin feature'
+expect "$ALLOWED" 'git -C /tmp/repo stash push -m wip'
+
 # A payload the guard cannot inspect must fail closed. An exit status other
 # than 2 is a non-blocking error and lets the tool call proceed.
 expect_payload "$BLOCKED" 'null tool_input' '{"tool_input":null}'

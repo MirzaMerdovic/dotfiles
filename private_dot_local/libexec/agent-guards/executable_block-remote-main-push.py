@@ -8,6 +8,20 @@ import sys
 # revision suffix. See gitrevisions(7) and git-check-ref-format(1).
 REVISION_SUFFIX_CHARS = "~^"
 
+# Git global options that take the following argument as their value. An option
+# missing from this set would hide the subcommand behind its value. The '=' forms
+# need no entry because they are a single token. See git(1).
+GIT_GLOBAL_OPTIONS_WITH_VALUE = {
+    "-C",
+    "-c",
+    "--git-dir",
+    "--work-tree",
+    "--namespace",
+    "--super-prefix",
+    "--config-env",
+    "--attr-source",
+}
+
 # Destinations that name the checked-out branch instead of an explicit ref.
 # Committing to local main is permitted, so these may resolve to main.
 UNRESOLVED_DESTINATIONS = {"", "HEAD", "@"}
@@ -115,17 +129,35 @@ def check_push(args: list[str]) -> None:
             block("Claude Code may not push, delete, force-push, or otherwise update remote main.")
 
 
+def find_subcommand(tokens: list[str], start: int) -> int | None:
+    index = start
+
+    while index < len(tokens):
+        token = tokens[index]
+
+        if not token.startswith("-"):
+            return index
+
+        if token in GIT_GLOBAL_OPTIONS_WITH_VALUE:
+            index += 2
+            continue
+
+        index += 1
+
+    return None
+
+
 def inspect_segment(tokens: list[str]) -> bool:
     for git_index, token in enumerate(tokens):
         if token != "git":
             continue
 
-        try:
-            push_index = tokens.index("push", git_index + 1)
-        except ValueError:
+        subcommand_index = find_subcommand(tokens, git_index + 1)
+
+        if subcommand_index is None or tokens[subcommand_index] != "push":
             continue
 
-        check_push(tokens[push_index + 1 :])
+        check_push(tokens[subcommand_index + 1 :])
         return True
 
     return False

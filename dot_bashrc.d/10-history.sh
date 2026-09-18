@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Bash history
 HISTCONTROL=ignoreboth:erasedups
 HISTSIZE=50000

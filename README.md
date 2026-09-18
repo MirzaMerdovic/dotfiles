@@ -42,6 +42,25 @@ The repository includes configuration for:
 
 The repository also contains shared agent safety configuration used by Claude Code and Codex.
 
+### Shell entry point
+
+`~/.bashrc` is managed. It reproduces the behaviour of Fedora's stock file:
+
+- It sources `/etc/bashrc`.
+- It prepends `$HOME/.local/bin` and `$HOME/bin` to `PATH`.
+- It sources the snippets in `~/.bashrc.d`.
+
+It differs from the stock file in two ways:
+
+- It sources `~/.bashrc.d/*.sh` rather than every file in that directory. An editor backup such as `30-aliases.sh~` is therefore not sourced.
+- It sources `~/.bashrc.local` last, when that file exists.
+
+The entry point MUST be managed. The snippets in `~/.bashrc.d` load only because `~/.bashrc` iterates that directory. An unmanaged entry point can be replaced without `chezmoi diff` reporting a change, because no managed file changes. Every snippet then stops loading and the validation check does not detect it.
+
+### Machine-local shell settings
+
+`~/.bashrc.local` holds shell settings that MUST NOT be committed, such as credentials and host-specific completions. The file is not managed, so `chezmoi apply` does not overwrite it. Create it with mode `600`.
+
 ## Not Managed
 
 Authentication and machine-local application state MUST NOT be committed.
@@ -49,6 +68,7 @@ Authentication and machine-local application state MUST NOT be committed.
 Examples include:
 
 ```text
+~/.bashrc.local
 ~/.claude.json
 ~/.codex/auth.json
 ~/.codex/*.sqlite*

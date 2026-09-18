@@ -1,0 +1,36 @@
+# .bashrc
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+    # shellcheck source=/dev/null
+    . /etc/bashrc
+fi
+
+# User specific environment
+# The right-hand side is quoted, so =~ performs a literal substring test. This
+# matches Fedora's stock .bashrc.
+# shellcheck disable=SC2076
+if ! [[ "$PATH" =~ "$HOME/.local/bin:$HOME/bin:" ]]; then
+    PATH="$HOME/.local/bin:$HOME/bin:$PATH"
+fi
+export PATH
+
+# Load the snippets this repository manages. Fedora's stock .bashrc sources
+# every file in ~/.bashrc.d. This file sources only *.sh, so an editor backup
+# such as 30-aliases.sh~ is not sourced.
+if [ -d ~/.bashrc.d ]; then
+    for rc in ~/.bashrc.d/*.sh; do
+        if [ -f "$rc" ]; then
+            # shellcheck source=/dev/null
+            . "$rc"
+        fi
+    done
+fi
+unset rc
+
+# Machine-local settings that this repository does not track, for example
+# credentials and host-specific completions.
+if [ -f ~/.bashrc.local ]; then
+    # shellcheck source=/dev/null
+    . ~/.bashrc.local
+fi

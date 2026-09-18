@@ -14,7 +14,8 @@
 #   check-style.sh docs/secrets.md README.md
 #   check-style.sh --max-words 30 docs/architecture.md
 #
-# Exit status: 0 no candidates, 1 candidates reported, 2 usage error.
+# Exit status: 0 no candidates, 1 candidates reported, 2 usage error or missing file.
+# A missing file is reported and the remaining files are still scanned.
 set -euo pipefail
 
 err() { echo "$*" >&2; }
@@ -52,6 +53,10 @@ strip_code() {
 
 # Report sentences longer than MAX_WORDS. Paragraphs are accumulated because a sentence
 # spans several wrapped lines. The reported line is where the paragraph starts.
+#
+# A list marker starts a new paragraph. Without that rule a list of short items is
+# accumulated into one buffer and reported as a single long sentence. A wrapped
+# continuation line carries no marker, so it still joins the item above it.
 long_sentences() {
 	local file="$1"
 	strip_code "$file" | awk -v file="$file" -v limit="$MAX_WORDS" '
@@ -69,6 +74,12 @@ long_sentences() {
 		}
 		/^[[:space:]]*$/ { flush(); next }
 		/^[[:space:]]*[#|>]/ { flush(); next }
+		/^[[:space:]]*([-*+]|[0-9]+[.)])[[:space:]]/ {
+			flush()
+			start = NR
+			buf = $0
+			next
+		}
 		{
 			if (buf == "") start = NR
 			buf = buf " " $0
@@ -126,8 +137,16 @@ done
 ((${#FILES[@]})) || usage
 
 found=0
+missing=0
 for file in "${FILES[@]}"; do
-	output="$(scan_file "$file")"
+	# scan_file returns 2 for a missing file. Capture the status so that one
+	# unreadable path does not end the run under set -e.
+	status=0
+	output="$(scan_file "$file")" || status=$?
+	if ((status)); then
+		missing=1
+		continue
+	fi
 	[ -n "$output" ] || continue
 	printf '%s\n' "$output"
 	found=1
@@ -136,6 +155,14 @@ done
 if ((found)); then
 	echo
 	echo "Candidates reported. Rewrite each one, or keep it and state the reason."
+fi
+
+if ((missing)); then
+	exit 2
+fi
+
+if ((found)); then
 	exit 1
 fi
+
 exit 0

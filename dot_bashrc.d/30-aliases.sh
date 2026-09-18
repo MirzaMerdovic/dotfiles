@@ -11,5 +11,3 @@ alias awake-status='systemctl --user status caffeinate.service --no-pager'
 alias c='clear'
 alias ..='cd ..'
 alias ...='cd ../..'
-
-# Git

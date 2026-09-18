@@ -73,6 +73,19 @@ expect "$BLOCKED" 'git push --repo=origin main'
 expect "$BLOCKED" 'git push'
 expect "$BLOCKED" 'git push origin'
 
+# Destinations the guard cannot resolve without inspecting repository state.
+expect "$BLOCKED" 'git push origin HEAD'
+expect "$BLOCKED" 'git push origin @'
+expect "$BLOCKED" 'git push origin HEAD~1'
+expect "$BLOCKED" 'git push --force origin @'
+expect "$BLOCKED" 'git push origin refs/heads/HEAD'
+expect "$BLOCKED" 'git push origin feature:'
+
+# Revision suffixes must not hide a main destination.
+expect "$BLOCKED" 'git push origin feature:main~0'
+expect "$BLOCKED" 'git push origin main^'
+expect "$BLOCKED" 'git push origin feature:main@{0}'
+
 # Compound commands must be inspected segment by segment.
 expect "$BLOCKED" 'git status && git push origin main'
 expect "$BLOCKED" 'git push origin feature && git push origin main'
@@ -85,6 +98,8 @@ expect "$ALLOWED" 'git push origin HEAD:feature'
 expect "$ALLOWED" 'git push origin :feature'
 expect "$ALLOWED" 'git push --force origin feature'
 expect "$ALLOWED" 'git push origin main-ish'
+expect "$ALLOWED" 'git push origin feature@2'
+expect "$ALLOWED" 'git push origin HEAD:refs/heads/feature'
 
 # Commands that are not a push at all.
 expect "$ALLOWED" 'git status'

@@ -4,10 +4,36 @@ import json
 import shlex
 import sys
 
+# A branch name may not contain '~' or '^', so either character always starts a
+# revision suffix. See gitrevisions(7) and git-check-ref-format(1).
+REVISION_SUFFIX_CHARS = "~^"
+
+# Destinations that name the checked-out branch instead of an explicit ref.
+# Committing to local main is permitted, so these may resolve to main.
+UNRESOLVED_DESTINATIONS = {"", "HEAD", "@"}
+
 
 def block(reason: str) -> None:
     print(f"Blocked: {reason}", file=sys.stderr)
     raise SystemExit(2)
+
+
+def normalize_destination(destination: str) -> str:
+    destination = destination.removeprefix("refs/heads/")
+
+    suffix_index = next(
+        (
+            index
+            for index, char in enumerate(destination)
+            if char in REVISION_SUFFIX_CHARS
+        ),
+        None,
+    )
+
+    if suffix_index is not None:
+        destination = destination[:suffix_index]
+
+    return destination.split("@{", 1)[0]
 
 
 def check_push(args: list[str]) -> None:
@@ -76,7 +102,14 @@ def check_push(args: list[str]) -> None:
         else:
             destination = refspec
 
-        destination = destination.removeprefix("refs/heads/")
+        destination = normalize_destination(destination)
+
+        if destination in UNRESOLVED_DESTINATIONS:
+            block(
+                "Claude Code must name the destination branch explicitly when "
+                "pushing. A HEAD or @ destination resolves to the checked-out "
+                "branch, which may be main."
+            )
 
         if destination == "main":
             block("Claude Code may not push, delete, force-push, or otherwise update remote main.")

@@ -237,18 +237,28 @@ jq
 yq
 gh
 
+TypeScript
+
 ShellCheck
 shfmt
 uv
+actionlint
 
 bat
 zoxide
 just
 delta
 eza
+
+OpenTofu
+Terragrunt
 ```
 
-TypeScript, React, Vite, and similar application dependencies should normally remain project-local.
+TypeScript is installed globally for type checking outside a project. A project that declares `typescript` in `package.json` uses its own version through package scripts or `npx`.
+
+React, Vite, and similar application dependencies MUST remain project-local.
+
+`dot_config/mise/config.toml` is the authoritative list. This section is a summary.
 
 ## Shell Script Verification
 
@@ -475,3 +485,25 @@ chezmoi diff
 ```
 
 indicates that the live managed configuration matches the repository state.
+
+### Expected diff output
+
+Claude Code writes to `~/.claude/settings.json` while it runs. It updates the theme, the output style, and the enabled plugin state. A `chezmoi diff` for that file is therefore expected, and it does not indicate a broken configuration.
+
+Review the difference before acting on it:
+
+```bash
+chezmoi diff ~/.claude/settings.json
+```
+
+Keep the live value:
+
+```bash
+chezmoi re-add ~/.claude/settings.json
+```
+
+Restore the repository value:
+
+```bash
+chezmoi apply ~/.claude/settings.json
+```

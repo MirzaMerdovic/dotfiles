@@ -273,6 +273,26 @@ Do not use:
 pnpm self-update
 ```
 
+### mise lockfile
+
+`~/.config/mise/config.toml` sets `lockfile = true`, and `~/.config/mise/mise.lock` records the resolved version, download URL, and SHA-256 checksum of every tool. Both files are managed. The lockfile is what makes two machines install the same toolchain from the same commit, because most tools are declared as `latest`.
+
+The lockfile covers seven platforms, so it is valid on Linux, macOS, and Windows, on x64 and arm64.
+
+Update the pinned versions deliberately:
+
+```bash
+mise upgrade
+mise lock --global
+chezmoi re-add ~/.config/mise/mise.lock
+```
+
+Then commit the change to `dot_config/mise/private_mise.lock` and state which tools moved.
+
+`mise lock --global` is required. Plain `mise lock` operates on the current project and reports that the global config declares the tools.
+
+Run the same three commands after adding a tool to `[tools]`. An unlocked tool resolves to whatever version is current at install time, which is the behaviour the lockfile exists to prevent.
+
 ### Claude Code
 
 Claude Code uses Anthropic's native installer:

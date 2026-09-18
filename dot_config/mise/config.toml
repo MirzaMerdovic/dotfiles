@@ -1,3 +1,8 @@
+[settings]
+# Record the resolved version of each tool in mise.lock so that two machines
+# bootstrapped at different times install the same toolchain.
+lockfile = true
+
 [tools]
 actionlint = "latest"
 bat = "latest"

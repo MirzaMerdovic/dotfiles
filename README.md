@@ -154,6 +154,10 @@ The script performs two actions:
 - It runs `chezmoi init` to keep the recorded source directory current.
 - It installs the CLI tools that mise does not manage.
 
+chezmoi is a prerequisite. The script exits with status 1 when `chezmoi` is not on `PATH`, and it installs nothing. Complete step 2 first.
+
+`chezmoi init` prompts for the git identity when `~/.config/chezmoi/chezmoi.toml` does not already hold it. See [Initialize chezmoi](#3-initialize-chezmoi).
+
 The tool installation requires `curl`, `jq`, `sha256sum`, `python3`, and `install`. Install any missing command at host level before running the script.
 
 ### 5. Apply the dotfiles

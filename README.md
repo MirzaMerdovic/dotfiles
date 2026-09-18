@@ -38,9 +38,29 @@ The repository includes configuration for:
 - Claude Code
 - Codex
 - zoxide
-- Bash completion files
+
+Bash completions are generated from the installed binary at shell start, by a snippet in `~/.bashrc.d`. No completion script is committed. A committed script is a copy that drifts from the CLI it completes.
 
 The repository also contains shared agent safety configuration used by Claude Code and Codex.
+
+### Shell entry point
+
+`~/.bashrc` is managed. It reproduces the behaviour of Fedora's stock file:
+
+- It sources `/etc/bashrc`.
+- It prepends `$HOME/.local/bin` and `$HOME/bin` to `PATH`.
+- It sources the snippets in `~/.bashrc.d`.
+
+It differs from the stock file in two ways:
+
+- It sources `~/.bashrc.d/*.sh` rather than every file in that directory. An editor backup such as `30-aliases.sh~` is therefore not sourced.
+- It sources `~/.bashrc.local` last, when that file exists.
+
+The entry point MUST be managed. The snippets in `~/.bashrc.d` load only because `~/.bashrc` iterates that directory. An unmanaged entry point can be replaced without `chezmoi diff` reporting a change, because no managed file changes. Every snippet then stops loading and the validation check does not detect it.
+
+### Machine-local shell settings
+
+`~/.bashrc.local` holds shell settings that MUST NOT be committed, such as credentials and host-specific completions. The file is not managed, so `chezmoi apply` does not overwrite it. Create it with mode `600`.
 
 ## Not Managed
 
@@ -49,6 +69,7 @@ Authentication and machine-local application state MUST NOT be committed.
 Examples include:
 
 ```text
+~/.bashrc.local
 ~/.claude.json
 ~/.codex/auth.json
 ~/.codex/*.sqlite*
@@ -97,6 +118,23 @@ chezmoi init --source=~/src/mm/dotfiles https://github.com/MirzaMerdovic/dotfile
 
 The repository contains `.chezmoi.toml.tmpl`. chezmoi renders it during `init` and writes the chosen location to `~/.config/chezmoi/chezmoi.toml`. Later chezmoi commands require no `--source` flag.
 
+`init` also prompts for the git identity:
+
+```text
+Git user name
+Git email address
+```
+
+The answers are stored in `~/.config/chezmoi/chezmoi.toml` and render `~/.config/git/config`. The identity is not committed, so a different person can install this repository without inheriting another person's name and address.
+
+A non-interactive `init` accepts the defaults, `Your Name` and `you@example.invalid`. Both are placeholders. Replace them:
+
+```bash
+chezmoi init --promptString git.name='Your Name' --promptString git.email='you@example.com'
+```
+
+`chezmoi init` re-prompts only for values that `~/.config/chezmoi/chezmoi.toml` does not already hold, so it is safe to re-run.
+
 Verify the source directory:
 
 ```bash
@@ -116,6 +154,10 @@ The script performs two actions:
 
 - It runs `chezmoi init` to keep the recorded source directory current.
 - It installs the CLI tools that mise does not manage.
+
+chezmoi is a prerequisite. The script exits with status 1 when `chezmoi` is not on `PATH`, and it installs nothing. Complete step 2 first.
+
+`chezmoi init` prompts for the git identity when `~/.config/chezmoi/chezmoi.toml` does not already hold it. See [Initialize chezmoi](#3-initialize-chezmoi).
 
 The tool installation requires `curl`, `jq`, `sha256sum`, `python3`, and `install`. Install any missing command at host level before running the script.
 
@@ -195,18 +237,28 @@ jq
 yq
 gh
 
+TypeScript
+
 ShellCheck
 shfmt
 uv
+actionlint
 
 bat
 zoxide
 just
 delta
 eza
+
+OpenTofu
+Terragrunt
 ```
 
-TypeScript, React, Vite, and similar application dependencies should normally remain project-local.
+TypeScript is installed globally for type checking outside a project. A project that declares `typescript` in `package.json` uses its own version through package scripts or `npx`.
+
+React, Vite, and similar application dependencies MUST remain project-local.
+
+`dot_config/mise/config.toml` is the authoritative list. This section is a summary.
 
 ## Shell Script Verification
 
@@ -252,6 +304,26 @@ Do not use:
 ```bash
 pnpm self-update
 ```
+
+### mise lockfile
+
+`~/.config/mise/config.toml` sets `lockfile = true`, and `~/.config/mise/mise.lock` records the resolved version, download URL, and SHA-256 checksum of every tool. Both files are managed. The lockfile is what makes two machines install the same toolchain from the same commit, because most tools are declared as `latest`.
+
+The lockfile covers seven platforms, so it is valid on Linux, macOS, and Windows, on x64 and arm64.
+
+Update the pinned versions deliberately:
+
+```bash
+mise upgrade
+mise lock --global
+chezmoi re-add ~/.config/mise/mise.lock
+```
+
+Then commit the change to `dot_config/mise/private_mise.lock` and state which tools moved.
+
+`mise lock --global` is required. Plain `mise lock` operates on the current project and reports that the global config declares the tools.
+
+Run the same three commands after adding a tool to `[tools]`. An unlocked tool resolves to whatever version is current at install time, which is the behaviour the lockfile exists to prevent.
 
 ### Claude Code
 
@@ -413,3 +485,25 @@ chezmoi diff
 ```
 
 indicates that the live managed configuration matches the repository state.
+
+### Expected diff output
+
+Claude Code writes to `~/.claude/settings.json` while it runs. It updates the theme, the output style, and the enabled plugin state. A `chezmoi diff` for that file is therefore expected, and it does not indicate a broken configuration.
+
+Review the difference before acting on it:
+
+```bash
+chezmoi diff ~/.claude/settings.json
+```
+
+Keep the live value:
+
+```bash
+chezmoi re-add ~/.claude/settings.json
+```
+
+Restore the repository value:
+
+```bash
+chezmoi apply ~/.claude/settings.json
+```

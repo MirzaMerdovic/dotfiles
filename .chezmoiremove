@@ -1,0 +1,4 @@
+# ~/.bashrc.d/45-pass-cli-completion.sh registers the Proton Pass CLI
+# completion from the installed binary. A copy in the bash-completion directory
+# is redundant and can drift from the installed CLI, so remove it.
+.local/share/bash-completion/completions/pass-cli

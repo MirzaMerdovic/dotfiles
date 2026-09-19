@@ -401,18 +401,29 @@ Remote repository rules should provide the authoritative protection for `main`.
 
 ### Guard verification
 
-`scripts/test-agent-guards.sh` feeds hook payloads to the guard on stdin and asserts the exit code. Status 2 denies the tool call and status 0 permits it.
+`scripts/test_agent_guards.py` tests the guard at two levels:
+
+- It writes hook payloads to the guard on stdin in a subprocess and asserts the exit code. Status 2 denies the tool call and status 0 permits it.
+- It imports the guard and calls its functions directly, which reaches inputs that are awkward to express as a command.
+
+The suite uses only the Python standard library.
 
 Check the repository copy:
 
 ```bash
-./scripts/test-agent-guards.sh
+./scripts/test_agent_guards.py
 ```
 
 Check the copy the hook runs:
 
 ```bash
-./scripts/test-agent-guards.sh --deployed
+./scripts/test_agent_guards.py --deployed
+```
+
+Name every case:
+
+```bash
+./scripts/test_agent_guards.py --verbose
 ```
 
 Run the second command after `chezmoi apply`. The repository copy and the deployed copy differ until the apply completes, and only the deployed copy enforces the policy.

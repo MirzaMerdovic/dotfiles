@@ -6,7 +6,37 @@ set -Eeuo pipefail
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(dirname -- "$script_dir")"
-guard="${repo_root}/private_dot_local/libexec/agent-guards/executable_block-remote-main-push.py"
+
+source_guard="${repo_root}/private_dot_local/libexec/agent-guards/executable_block-remote-main-push.py"
+deployed_guard="${HOME}/.local/libexec/agent-guards/block-remote-main-push.py"
+
+usage() {
+	printf 'usage: %s [--deployed | --guard PATH]\n' "${0##*/}" >&2
+	exit 2
+}
+
+# The deployed copy is the file the hook runs. The repository copy takes effect
+# only after chezmoi apply, so the two can differ.
+guard="$source_guard"
+
+while (($#)); do
+	case "$1" in
+	--deployed)
+		guard="$deployed_guard"
+		shift
+		;;
+	--guard)
+		guard="${2:-}"
+		[[ -n "$guard" ]] || usage
+		shift 2
+		;;
+	-h | --help) usage ;;
+	*)
+		printf 'unknown argument: %s\n' "$1" >&2
+		usage
+		;;
+	esac
+done
 
 # Hook exit codes. 2 denies the tool call, 0 permits it.
 readonly BLOCKED=2
@@ -19,6 +49,8 @@ checks=0
 	printf 'error: guard not found: %s\n' "$guard" >&2
 	exit 1
 }
+
+printf 'guard: %s\n\n' "$guard"
 
 # Feeds a raw payload to the guard and reports the guard exit code.
 run_guard() {

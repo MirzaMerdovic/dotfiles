@@ -399,6 +399,26 @@ The agents:
 
 Remote repository rules should provide the authoritative protection for `main`.
 
+### Guard verification
+
+`scripts/test-agent-guards.sh` feeds hook payloads to the guard on stdin and asserts the exit code. Status 2 denies the tool call and status 0 permits it.
+
+Check the repository copy:
+
+```bash
+./scripts/test-agent-guards.sh
+```
+
+Check the copy the hook runs:
+
+```bash
+./scripts/test-agent-guards.sh --deployed
+```
+
+Run the second command after `chezmoi apply`. The repository copy and the deployed copy differ until the apply completes, and only the deployed copy enforces the policy.
+
+The guard resolves git aliases, because an alias can hide a push. It reads them from the directory in the hook payload. An alias that shadows a built-in command is not resolved, because git ignores such an alias.
+
 ## Keep-Awake Service
 
 The workstation includes a user-level caffeine service.

@@ -97,6 +97,26 @@ expect() {
 	assert_status "$expected" "$status" "$command"
 }
 
+# Asserts the guard exit code for a command run in a given directory. The guard
+# reads git alias definitions from that directory.
+expect_in_dir() {
+	local expected="$1"
+	local dir="$2"
+	local command="$3"
+	local payload
+	local status=0
+
+	payload="$(
+		python3 -c \
+			'import json, sys; print(json.dumps({"cwd": sys.argv[1], "tool_input": {"command": sys.argv[2]}}))' \
+			"$dir" "$command"
+	)"
+
+	run_guard "$payload" || status=$?
+
+	assert_status "$expected" "$status" "[in ${dir##*/}] $command"
+}
+
 # Asserts the guard exit code for a payload the hook did not necessarily
 # produce.
 expect_payload() {
@@ -198,6 +218,39 @@ expect_payload "$BLOCKED" 'non-string command' '{"tool_input":{"command":123}}'
 expect_payload "$ALLOWED" 'empty object' '{}'
 expect_payload "$ALLOWED" 'absent command' '{"tool_input":{}}'
 expect_payload "$ALLOWED" 'null command' '{"tool_input":{"command":null}}'
+
+# An alias can hide a push. Build a repository whose configuration defines the
+# aliases, because the guard reads them from the command's directory.
+alias_repo="$(mktemp -d)"
+trap 'rm -rf "$alias_repo"' EXIT
+
+git init -q "$alias_repo"
+git -C "$alias_repo" config alias.p 'push origin main'
+git -C "$alias_repo" config alias.safe 'push origin feature'
+git -C "$alias_repo" config alias.st 'status --short'
+git -C "$alias_repo" config alias.shellpush '!git push origin main'
+git -C "$alias_repo" config alias.shellsafe '!echo hello'
+git -C "$alias_repo" config alias.hop 'p'
+git -C "$alias_repo" config alias.withopts '-C /tmp push origin main'
+git -C "$alias_repo" config alias.status 'push origin main'
+
+expect_in_dir "$BLOCKED" "$alias_repo" 'git p'
+expect_in_dir "$BLOCKED" "$alias_repo" 'git hop'
+expect_in_dir "$BLOCKED" "$alias_repo" 'git shellpush'
+expect_in_dir "$BLOCKED" "$alias_repo" 'git withopts'
+expect_in_dir "$ALLOWED" "$alias_repo" 'git safe'
+expect_in_dir "$ALLOWED" "$alias_repo" 'git st'
+expect_in_dir "$ALLOWED" "$alias_repo" 'git shellsafe'
+expect_in_dir "$ALLOWED" "$alias_repo" 'git unknown-not-an-alias'
+
+# git ignores an alias that shadows a built-in command, so alias.status does not
+# make 'git status' a push.
+expect_in_dir "$ALLOWED" "$alias_repo" 'git status'
+
+# An alias defined on the command line cannot be resolved from configuration.
+expect "$BLOCKED" 'git -c alias.p=push p origin main'
+expect "$BLOCKED" 'git -c alias.p="push origin main" p'
+expect "$BLOCKED" 'git --config-env=alias.p=EVIL p'
 
 printf '\n%s checks, %s failures\n' "$checks" "$failures"
 

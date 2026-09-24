@@ -71,6 +71,7 @@ Examples include:
 ```text
 ~/.bashrc.local
 ~/.claude.json
+~/.claude/settings.local.json
 ~/.codex/auth.json
 ~/.codex/*.sqlite*
 ~/.config/gh/
@@ -81,6 +82,8 @@ Examples include:
 Caches, logs, browser profiles, desktop state, and downloaded application packages are also intentionally excluded.
 
 `~/.config/shad/shad.toml` is also not managed. It holds a machine-specific project list.
+
+`~/.claude/settings.local.json` is also not managed. It holds the Claude Code model selection, which is a per-machine preference. `.chezmoiignore` lists the path, so `chezmoi add ~/.claude` does not import it.
 
 ## New Workstation Bootstrap
 
@@ -521,6 +524,15 @@ indicates that the live managed configuration matches the repository state.
 
 Claude Code writes to `~/.claude/settings.json` while it runs. It updates the theme, the output style, and the enabled plugin state. A `chezmoi diff` for that file is therefore expected, and it does not indicate a broken configuration.
 
+Claude Code also reorders the keys when it writes the file. Compare the content rather than the byte order:
+
+```bash
+chezmoi cd
+diff <(jq -S . dot_claude/settings.json) <(jq -S . ~/.claude/settings.json)
+```
+
+A `model` key in the live file means Claude Code wrote the model selection back to the managed file. Move that key to `~/.claude/settings.local.json` and apply the repository value.
+
 Review the difference before acting on it:
 
 ```bash
@@ -538,3 +550,5 @@ Restore the repository value:
 ```bash
 chezmoi apply ~/.claude/settings.json
 ```
+
+chezmoi prompts when the live file changed after the last apply. Review the difference, then repeat the command with `--force`.

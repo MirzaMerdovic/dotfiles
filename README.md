@@ -83,7 +83,7 @@ Caches, logs, browser profiles, desktop state, and downloaded application packag
 
 `~/.config/shad/shad.toml` is also not managed. It holds a machine-specific project list.
 
-`~/.claude/settings.local.json` is also not managed. It holds the Claude Code model selection, which is a per-machine preference. `.chezmoiignore` lists the path, so `chezmoi add ~/.claude` does not import it.
+`~/.claude/settings.local.json` is also not managed. `.chezmoiignore` lists the path.
 
 ## New Workstation Bootstrap
 
@@ -433,6 +433,24 @@ Run the second command after `chezmoi apply`. The repository copy and the deploy
 
 The guard resolves git aliases, because an alias can hide a push. It reads them from the directory in the hook payload. An alias that shadows a built-in command is not resolved, because git ignores such an alias.
 
+### Claude Code settings
+
+chezmoi manages part of `~/.claude/settings.json`. Claude Code writes its own keys to the same file, for example `model`, `modelSettings`, `autoMode`, and `skillOverrides`. `/model` saves the default model to this file.
+
+`dot_claude/modify_settings.json` is a chezmoi modify script. On `chezmoi apply`, chezmoi sends the live file to the script on stdin. The script merges the repository keys into the live content with `jq`:
+
+- An object merges key by key, at every depth.
+- Any other value replaces the live value. This includes arrays, for example `hooks.PreToolUse`.
+- A key that the repository does not set keeps its live value.
+
+The script requires `jq` on `PATH`. [Run the bootstrap script](#4-run-the-bootstrap-script) lists `jq` as a host requirement.
+
+`chezmoi diff ~/.claude/settings.json` reports a difference only when a repository key has a different live value. Claude Code changes `theme`, `outputStyle`, and `enabledPlugins` when they are changed in a session. `chezmoi apply` restores the repository values.
+
+To change a managed key, edit the JSON document in `dot_claude/modify_settings.json`.
+
+The live file can hold organization-specific values, and this repository is public. `chezmoi add` MUST NOT be run on `~/.claude/settings.json` or on `~/.claude`. It replaces the modify script with a copy of the live file, without a prompt. `chezmoi re-add` skips the file.
+
 ## Keep-Awake Service
 
 The workstation includes a user-level caffeine service.
@@ -519,36 +537,3 @@ chezmoi diff
 ```
 
 indicates that the live managed configuration matches the repository state.
-
-### Expected diff output
-
-Claude Code writes to `~/.claude/settings.json` while it runs. It updates the theme, the output style, and the enabled plugin state. A `chezmoi diff` for that file is therefore expected, and it does not indicate a broken configuration.
-
-Claude Code also reorders the keys when it writes the file. Compare the content rather than the byte order:
-
-```bash
-chezmoi cd
-diff <(jq -S . dot_claude/settings.json) <(jq -S . ~/.claude/settings.json)
-```
-
-A `model` key in the live file means Claude Code wrote the model selection back to the managed file. Move that key to `~/.claude/settings.local.json` and apply the repository value.
-
-Review the difference before acting on it:
-
-```bash
-chezmoi diff ~/.claude/settings.json
-```
-
-Keep the live value:
-
-```bash
-chezmoi re-add ~/.claude/settings.json
-```
-
-Restore the repository value:
-
-```bash
-chezmoi apply ~/.claude/settings.json
-```
-
-chezmoi prompts when the live file changed after the last apply. Review the difference, then repeat the command with `--force`.

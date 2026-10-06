@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# chezmoi modify script for ~/.claude/settings.json. chezmoi sends the live file on
+# stdin, or nothing when the file does not exist, and writes stdout to the target.
+#
+# Claude Code writes its own keys to this file, for example `model` and `autoMode`.
+# The live file can hold organization-specific values, so it MUST NOT be imported into
+# this public repository. The merge overwrites only the keys below and keeps every
+# other live key.
+#
+# jq `*` merges objects at every depth. Every other value, including an array, replaces
+# the live value. jq keeps the live key order and the two-space indent that Claude Code
+# writes, so the output is identical to the live file when the values already match.
+set -euo pipefail
+
+managed=$(
+	cat <<'EOF'
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "extraKnownMarketplaces": {
+    "openai-codex": {
+      "source": {
+        "source": "github",
+        "repo": "openai/codex-plugin-cc"
+      }
+    }
+  },
+  "theme": "dark",
+  "enabledPlugins": {
+    "codex@openai-codex": true
+  },
+  "outputStyle": "Pragmatic Engineer",
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "permissions": {
+    "disableBypassPermissionsMode": "disable"
+  },
+  "autoUpdatesChannel": "stable",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.local/libexec/agent-guards/block-remote-main-push.py\""
+          }
+        ]
+      }
+    ]
+  }
+}
+EOF
+)
+
+jq -n --argjson managed "$managed" '(first(inputs) // {}) * $managed'

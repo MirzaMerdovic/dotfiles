@@ -2,5 +2,5 @@ README.md
 bootstrap.sh
 scripts/
 .config/shad/shad.toml
-__pycache__/
+**/__pycache__
 .claude/settings.local.json

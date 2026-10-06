@@ -30,6 +30,7 @@ The repository includes configuration for:
 - Bash
 - Git
 - Kitty
+- JetBrains Mono font
 - tmux
 - mise
 - Zed
@@ -357,6 +358,21 @@ Update GUI applications with:
 ```bash
 flatpak update
 ```
+
+### JetBrains Mono
+
+Kitty uses JetBrains Mono. `.chezmoiexternal.toml` declares the font. `chezmoi apply` downloads the release archive and writes the variable fonts to `~/.local/share/fonts/JetBrainsMono`. fontconfig reads that directory, so no host package is required.
+
+The entry pins the archive URL and its SHA-256 checksum. `chezmoi apply` fails when the downloaded archive does not match the checksum. JetBrains publishes no checksum for the archive. The pinned value is the hash of the archive when it was pinned.
+
+Both entries in `.chezmoiexternal.toml` write below `~/.local/share`. `private_dot_local/private_share/.keep` declares `~/.local/share` with mode `0700`. It MUST NOT be removed. Without it, chezmoi treats `~/.local/share` as a parent directory of the externals and changes its mode to `0755`.
+
+Update the font:
+
+1. Set `url` to the archive of the new release.
+2. Compute the checksum with `curl -fsSL <url> | sha256sum`.
+3. Set `checksum.sha256` to the result.
+4. Run `chezmoi apply`.
 
 ## AI Coding Agents
 

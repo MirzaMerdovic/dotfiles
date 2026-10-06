@@ -63,7 +63,10 @@ long_sentences() {
 		function flush(  tmp, parts, words, n, i, count) {
 			if (buf ~ /^[[:space:]]*$/) { buf = ""; return }
 			tmp = buf
-			gsub(/[.!?:][[:space:]]+/, "&@@CUT@@", tmp)
+			# A terminator may carry closing emphasis, a backtick, a quote or a bracket
+			# before the space. Cutting only on the bare terminator merges a bold lead-in
+			# sentence with the sentence after it and reports the pair as one.
+			gsub(/[.!?:][*`")\]]*[[:space:]]+/, "&@@CUT@@", tmp)
 			n = split(tmp, parts, "@@CUT@@")
 			for (i = 1; i <= n; i++) {
 				count = split(parts[i], words, /[[:space:]]+/)
@@ -88,6 +91,16 @@ long_sentences() {
 	'
 }
 
+# A match that is part of a proper noun is not the pattern it resembles. Each case names
+# the match and the surrounding text that identifies the proper noun.
+proper_noun() {
+	local match="${1,,}" line="${2,,}"
+	case "$match" in
+	"let's") [[ "$line" == *"let's encrypt"* ]] ;;
+	*) return 1 ;;
+	esac
+}
+
 scan_file() {
 	local file="$1" stripped entry label regex hits line match snippet
 	local -a src
@@ -106,6 +119,7 @@ scan_file() {
 			while IFS=: read -r line match; do
 				[ -n "$line" ] || continue
 				snippet="${src[line - 1]}"
+				proper_noun "$match" "$snippet" && continue
 				snippet="${snippet#"${snippet%%[![:space:]]*}"}"
 				printf '%s:%s: [%s] %s | %.52s\n' "$file" "$line" "$label" "$match" "$snippet"
 			done <<<"$hits"

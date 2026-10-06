@@ -6,6 +6,7 @@ lockfile = true
 [tools]
 actionlint = "latest"
 bat = "latest"
+bats = "latest"
 bun = "latest"
 delta = "latest"
 eza = "latest"

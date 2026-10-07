@@ -378,7 +378,9 @@ Global Claude Code skills are stored in:
 ~/.claude/skills/
 ```
 
-The `doc-style` skill applies the `Communication Style` and `Documentation` rules from `~/.claude/CLAUDE.md`. Both files are managed here, so the skill and the rules it implements stay in one repository.
+The `doc-style` skill comes from the [haddock](https://github.com/throw-if-null/haddock) repository. `.chezmoiexternal.toml` downloads a tagged release to `~/.local/share/haddock`, and `~/.claude/skills/doc-style` is a symlink into it. A `PostToolUse` hook in `~/.claude/settings.json` runs the skill's checker after Claude Code edits a Markdown file.
+
+To update the skill, change the tag in the `url` of the external and the `checksum.sha256` next to it, then run `chezmoi apply`.
 
 Global Codex instructions are stored in:
 

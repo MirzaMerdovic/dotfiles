@@ -48,6 +48,18 @@ managed=$(
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.local/share/haddock/hooks/check-markdown\"",
+            "timeout": 30
+          }
+        ]
+      }
     ]
   }
 }

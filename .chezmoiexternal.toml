@@ -1,0 +1,10 @@
+
+# The doc-style skill and its checker. See "Claude Code" in README.md. The tag pins the
+# version; update the url and the checksum together.
+[".local/share/haddock"]
+type = "archive"
+url = "https://github.com/throw-if-null/haddock/archive/refs/tags/v0.1.0.tar.gz"
+checksum.sha256 = "bed8524ea36629008ff7f1b10da70f0e2404f45ac0c1340b54553f4bd804e45b"
+exact = true
+stripComponents = 1
+exclude = ["**/.github/**", "**/tests/**"]

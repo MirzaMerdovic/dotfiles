@@ -10,6 +10,9 @@
 # jq `*` merges objects at every depth. Every other value, including an array, replaces
 # the live value. jq keeps the live key order and the two-space indent that Claude Code
 # writes, so the output is identical to the live file when the values already match.
+#
+# A key that this file does not set keeps its live value. An empty array is therefore the
+# only way to remove hooks that an earlier version of this file installed.
 set -euo pipefail
 
 managed=$(
@@ -49,18 +52,7 @@ managed=$(
         ]
       }
     ],
-    "PostToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"$HOME/.local/share/haddock/hooks/check-markdown\"",
-            "timeout": 30
-          }
-        ]
-      }
-    ]
+    "PostToolUse": []
   }
 }
 EOF

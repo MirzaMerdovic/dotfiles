@@ -2,7 +2,9 @@
 
 ## Git Safety
 
-- MUST NOT add Claude, AI, generated-by, or co-author attribution to commits or pull request descriptions.
+- MUST NOT add generic tool attribution to commits or pull request descriptions, for example a `Co-Authored-By: Claude` trailer or a "Generated with Claude Code" line.
+- In a session the user directs, commits carry the user's Git identity.
+- An agent that works without the user's direction MAY commit under its own configured identity.
 - MUST NOT update `main` on remote.
 - MAY commit to the local `main` branch.
 - MAY push non-main branches.

@@ -415,7 +415,7 @@ The agents:
 - MUST NOT push directly to remote `main`.
 - MAY commit to local `main`.
 - MAY push non-`main` branches.
-- MUST NOT add AI or co-author attribution to commits or pull requests.
+- MUST NOT add generic tool attribution to commits or pull requests. In a session the user directs, commits carry the user's Git identity. An agent that works without that direction MAY commit under its own configured identity.
 - SHOULD verify changes before reporting them as successful.
 
 Remote repository rules should provide the authoritative protection for `main`.

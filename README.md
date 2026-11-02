@@ -365,7 +365,7 @@ Kitty uses JetBrains Mono. `.chezmoiexternal.toml` declares the font. `chezmoi a
 
 The entry pins the archive URL and its SHA-256 checksum. `chezmoi apply` fails when the downloaded archive does not match the checksum. JetBrains publishes no checksum for the archive. The pinned value is the hash of the archive when it was pinned.
 
-Both entries in `.chezmoiexternal.toml` write below `~/.local/share`. `private_dot_local/private_share/.keep` declares `~/.local/share` with mode `0700`. It MUST NOT be removed. Without it, chezmoi treats `~/.local/share` as a parent directory of the externals and changes its mode to `0755`.
+The entry in `.chezmoiexternal.toml` writes below `~/.local/share`. `private_dot_local/private_share/.keep` declares `~/.local/share` with mode `0700`. It MUST NOT be removed. Without it, chezmoi treats `~/.local/share` as a parent directory of the external and changes its mode to `0755`.
 
 Update the font:
 
@@ -388,15 +388,9 @@ Claude's default engineering persona is stored in:
 ~/.claude/output-styles/pragmatic-engineer.md
 ```
 
-Global Claude Code skills are stored in:
+The `doc-maintenance` skill comes from the [haddock](https://github.com/throw-if-null/haddock) Claude Code plugin. `dot_claude/modify_settings.json` adds the `throw-if-null` marketplace at a tagged `ref` and enables `haddock@throw-if-null`.
 
-```text
-~/.claude/skills/
-```
-
-The `doc-style` skill comes from the [haddock](https://github.com/throw-if-null/haddock) repository. `.chezmoiexternal.toml` downloads a tagged release to `~/.local/share/haddock`, and `~/.claude/skills/doc-style` is a symlink into it.
-
-To update the skill, change the tag in the `url` of the external and the `checksum.sha256` next to it, then run `chezmoi apply`.
+To update the plugin, change `ref`, run `chezmoi apply`, then run `claude plugin marketplace update throw-if-null` and `claude plugin update haddock@throw-if-null`.
 
 Global Codex instructions are stored in:
 

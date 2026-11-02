@@ -1,13 +1,3 @@
-# The doc-style skill and its checker. See "Claude Code" in README.md. The tag pins the
-# version; update the url and the checksum together.
-[".local/share/haddock"]
-type = "archive"
-url = "https://github.com/throw-if-null/haddock/archive/refs/tags/v0.2.0.tar.gz"
-checksum.sha256 = "1fd2c52ae73381cb44ffd62b98355d4ec135e3ab8ffb04922c3148c5833a04b1"
-exact = true
-stripComponents = 1
-exclude = ["**/.github/**", "**/tests/**"]
-
 # Font used by kitty. See "JetBrains Mono" in README.md.
 [".local/share/fonts/JetBrainsMono"]
 type = "archive"

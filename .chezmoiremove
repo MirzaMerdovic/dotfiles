@@ -2,3 +2,8 @@
 # completion from the installed binary. A copy in the bash-completion directory
 # is redundant and can drift from the installed CLI, so remove it.
 .local/share/bash-completion/completions/pass-cli
+
+# The haddock Claude Code plugin provides the doc-maintenance skill. The doc-style
+# skill symlink and the haddock archive it points into are redundant, so remove them.
+.claude/skills/doc-style
+.local/share/haddock

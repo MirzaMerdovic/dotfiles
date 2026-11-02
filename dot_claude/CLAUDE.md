@@ -2,7 +2,9 @@
 
 ## Git Safety
 
-- MUST NOT add Claude, AI, generated-by, or co-author attribution to commits or pull request descriptions.
+- MUST NOT add generic tool attribution to commits or pull request descriptions, for example a `Co-Authored-By: Claude` trailer or a "Generated with Claude Code" line.
+- In a session the user directs, an agent MUST commit under the user's Git identity.
+- An agent that works without the user's direction MAY commit under its own configured identity.
 - MUST NOT update `main` on remote.
 - MAY commit to the local `main` branch.
 - MAY push non-main branches.
@@ -55,9 +57,10 @@ Apply these rules to text output, code discussions, architecture reviews, commit
 
 ### Code Comments
 
-- A comment MUST describe current behavior, or the reason the current implementation is required.
+- A comment MUST describe current behavior that the code does not show, or the reason for the current design.
 - A comment MUST NOT describe change history, for example "this logic was duplicated in three places".
-- A comment MUST NOT describe the decision-making process, for example alternatives considered or refactoring steps performed.
+- A comment MUST NOT describe how a decision was reached, for example the options weighed or the refactoring steps performed.
+- A comment MAY state the reason that a simpler approach is incorrect.
 - A comment MUST NOT reference the task, request, or conversation that produced the change.
 - A comment MUST NOT restate the code in prose.
 - Do not add a comment that marks a change, for example "new", "updated", "moved here", or "keep for compatibility" without a stated reason.

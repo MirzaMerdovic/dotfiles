@@ -7,10 +7,12 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "colorize_brackets": true,
   "collaboration_panel": {
     "button": false
   },
   "project_panel": {
+    "hide_hidden": false,
     "dock": "left"
   },
   "agent": {

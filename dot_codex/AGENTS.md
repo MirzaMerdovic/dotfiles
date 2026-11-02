@@ -76,7 +76,7 @@ Apply Simplified Technical English (STE) principles where practical. Do not enfo
 ## Git Safety
 
 - MUST NOT add generic tool attribution to commits or pull request descriptions, for example a co-author trailer that names Codex or OpenAI, or a "Generated with Codex" line.
-- In a session the user directs, commits carry the user's Git identity.
+- In a session the user directs, an agent MUST commit under the user's Git identity.
 - An agent that works without the user's direction MAY commit under its own configured identity.
 - MUST NOT update `main` on any remote.
 - MAY commit to the local `main` branch.

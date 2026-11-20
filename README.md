@@ -393,7 +393,6 @@ OpenTofu
 Terragrunt
 Databricks CLI
 Exoscale CLI
-rainfrog
 ```
 
 TypeScript is installed globally for type checking outside a project. A project that declares `typescript` in `package.json` uses its own version through package scripts or `npx`.

@@ -209,7 +209,11 @@ flatpak install flathub app.zen_browser.zen io.dbeaver.DBeaverCommunity
 
 ### 2. Install chezmoi
 
-Install chezmoi using its official user-level installer.
+Install chezmoi using its official user-level installer:
+
+```bash
+sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
+```
 
 Verify:
 
@@ -287,7 +291,17 @@ exec bash
 
 ### 6. Install mise
 
-Install mise using its official installer.
+Install mise using its official installer:
+
+```bash
+curl https://mise.run | sh
+```
+
+The installer writes `~/.local/bin/mise`. Start a new shell, so that `~/.bashrc.d/20-mise.sh` activates mise:
+
+```bash
+exec bash
+```
 
 The managed configuration is stored at:
 
@@ -308,26 +322,13 @@ mise doctor
 mise ls
 ```
 
-### 7. Restore Machine-Local Authentication
+### 7. Install the remaining applications
 
-Authentication is intentionally not stored in this repository.
-
-Authenticate the tools that are required on the machine.
-
-Examples:
+Claude Code uses the Anthropic native installer:
 
 ```bash
-gh auth login
-gh auth setup-git
-
-az login
-
-pass-cli login
+curl -fsSL https://claude.ai/install.sh | bash
 ```
-
-Authenticate Claude Code and Codex separately using their supported login flows.
-
-### 8. Install the remaining applications
 
 Kitty and Zed use their vendor installers. The installers write the applications to `~/.local/kitty.app` and `~/.local/zed.app`.
 
@@ -356,6 +357,44 @@ uv tool install --editable ~/src/tin/shad
 ```
 
 `shad` is an editable install. It runs the code in a clone of [throw-if-null/shad](https://github.com/throw-if-null/shad), so clone the repository first. The path is an example. Do not move or delete the clone after the install.
+
+### 8. Restore Machine-Local Authentication and Files
+
+Authentication is intentionally not stored in this repository.
+
+Authenticate the tools that are required on the machine.
+
+Examples:
+
+```bash
+gh auth login
+gh auth setup-git
+
+az login
+
+pass-cli login
+```
+
+Authenticate Claude Code and Codex separately using their supported login flows.
+
+The files below are also not stored in this repository. Back them up before a reinstall, and restore them in this step:
+
+| File | Content |
+|---|---|
+| `~/.bashrc.local` | Shell settings. See [Machine-local shell settings](#machine-local-shell-settings). |
+| `~/.gitconfig` and the files it includes | Per-directory Git identities and `init.defaultBranch`. `gh auth setup-git` writes its credential helper to the same file. |
+| `~/.ssh/id_*` | SSH private keys. `ssh` rejects a private key that other users can read, so restore each one with mode `600`. |
+| `~/.config/shad/shad.toml` | The shad project list. |
+| `~/.claude/projects/*/memory/` | Claude Code memory, one directory for each project. |
+
+Back up and restore the Claude Code memory:
+
+```bash
+cd ~/.claude/projects && tar -czf ~/claude-memory.tar.gz ./*/memory
+tar -C ~/.claude/projects -xzf ~/claude-memory.tar.gz
+```
+
+The `./` prefix is required, because each directory name starts with `-`. A directory name is the absolute path of the project, with `/` replaced by `-`. Claude Code reads a memory directory only when the project is at the same path. Clone each project to its previous path, or rename its directory.
 
 ## CLI Tooling
 

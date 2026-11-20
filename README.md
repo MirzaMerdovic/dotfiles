@@ -18,6 +18,7 @@ Tool ownership is intentionally separated:
 | Containers | Podman |
 | GUI applications | Flatpak where practical |
 | System-integrated applications | RPM/rpm-ostree when required |
+| Kitty and Zed | Vendor installers |
 | Claude Code | Anthropic native installer |
 | Codex CLI | mise |
 
@@ -98,9 +99,113 @@ rpm-ostree upgrade
 
 Reboot if a new deployment was created.
 
-Install the small set of host-level tools required by the workstation.
-
 Host-level packages are reserved for software that requires direct system integration.
+
+#### Package repositories
+
+Enable the third-party repositories. This enables Flathub and the RPM Fusion NVIDIA driver repository:
+
+```bash
+sudo fedora-third-party enable
+```
+
+Add the NetBird repository:
+
+```bash
+sudo tee /etc/yum.repos.d/netbird.repo <<'EOF'
+[NetBird]
+name=NetBird
+baseurl=https://pkgs.netbird.io/yum/
+enabled=1
+gpgcheck=1
+gpgkey=https://pkgs.netbird.io/yum/repodata/repomd.xml.key
+repo_gpgcheck=1
+EOF
+```
+
+#### Secure Boot signing key
+
+Secure Boot is enabled. The kernel loads the NVIDIA module only when the module is signed with an enrolled Machine Owner Key (MOK). akmods signs the module with the key pair in `/etc/pki/akmods`. On Silverblue, akmods cannot read that directory during an rpm-ostree transaction. The local package `akmods-keys` from [CheariX/silverblue-akmods-keys](https://github.com/CheariX/silverblue-akmods-keys) installs a copy of the key pair that akmods can read.
+
+The enrolled MOK stays in the firmware after a reinstall. The key pair does not. Back it up before the reinstall:
+
+```bash
+sudo tar -C /etc/pki -czf akmods-keys.tar.gz akmods/certs akmods/private
+```
+
+The archive contains the private key. Store it as a credential.
+
+Install the build requirements:
+
+```bash
+rpm-ostree install --apply-live rpmdevtools akmods
+```
+
+Restore the key pair from the backup:
+
+```bash
+sudo tar -C /etc/pki -xzf akmods-keys.tar.gz
+```
+
+Without a backup, create a new key pair and request its enrollment. `mokutil` asks for a one-time password. The MOK manager asks for the same password at the next boot.
+
+```bash
+sudo kmodgenca
+sudo mokutil --import /etc/pki/akmods/certs/public_key.der
+```
+
+Build and install `akmods-keys`:
+
+```bash
+git clone https://github.com/CheariX/silverblue-akmods-keys
+cd silverblue-akmods-keys
+sudo bash setup.sh
+rpm-ostree install "akmods-keys-0.0.2-8.fc$(rpm -E %fedora).noarch.rpm"
+```
+
+The built RPM contains the private key. Delete it after the install.
+
+Reboot.
+
+#### Layered packages
+
+```bash
+rpm-ostree install akmod-nvidia xorg-x11-drv-nvidia-cuda netbird netbird-ui podman-compose tmux
+```
+
+Slack and Zoom are local RPMs. Download them from <https://slack.com/downloads/linux> and <https://zoom.us/download?os=linux>, then install them:
+
+```bash
+rpm-ostree install ./slack-*.rpm ./zoom_x86_64.rpm
+```
+
+#### Kernel arguments
+
+```bash
+rpm-ostree kargs \
+	--append=rd.driver.blacklist=nouveau,nova_core \
+	--append=modprobe.blacklist=nouveau,nova_core \
+	--append=acpi_backlight=native \
+	--append=amdgpu.dcdebugmask=0x10
+```
+
+- The blacklist arguments stop the `nouveau` and `nova_core` drivers from loading, so the NVIDIA driver binds to the GPU.
+- `acpi_backlight=native` selects the native backlight driver.
+- `amdgpu.dcdebugmask=0x10` disables Panel Self Refresh in the AMD display driver.
+
+Reboot. Verify that the loaded NVIDIA module is signed with the akmods key:
+
+```bash
+modinfo -F signer nvidia
+```
+
+The output is the key name, for example `fedora_1788802164_0a05346e`.
+
+#### Flatpak applications
+
+```bash
+flatpak install flathub app.zen_browser.zen io.dbeaver.DBeaverCommunity
+```
 
 ### 2. Install chezmoi
 
@@ -222,6 +327,36 @@ pass-cli login
 
 Authenticate Claude Code and Codex separately using their supported login flows.
 
+### 8. Install the remaining applications
+
+Kitty and Zed use their vendor installers. The installers write the applications to `~/.local/kitty.app` and `~/.local/zed.app`.
+
+```bash
+curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
+curl -f https://zed.dev/install.sh | sh
+```
+
+The Zed installer links `~/.local/bin/zed` and creates a desktop entry. The kitty installer does neither. Link the binaries and create the desktop entry:
+
+```bash
+ln -sf ~/.local/kitty.app/bin/kitty ~/.local/kitty.app/bin/kitten ~/.local/bin/
+mkdir -p ~/.local/share/applications
+cp ~/.local/kitty.app/share/applications/kitty.desktop ~/.local/share/applications/
+sed -i \
+	-e "s|Icon=kitty|Icon=$HOME/.local/kitty.app/share/icons/hicolor/256x256/apps/kitty.png|" \
+	-e "s|Exec=kitty|Exec=$HOME/.local/kitty.app/bin/kitty|" \
+	~/.local/share/applications/kitty.desktop
+```
+
+Install the Python CLI applications as uv tools:
+
+```bash
+uv tool install azure-cli
+uv tool install --editable ~/src/tin/shad
+```
+
+`shad` is an editable install. It runs the code in a clone of [throw-if-null/shad](https://github.com/throw-if-null/shad), so clone the repository first. The path is an example. Do not move or delete the clone after the install.
+
 ## CLI Tooling
 
 The global mise configuration includes development tools such as:
@@ -256,6 +391,8 @@ eza
 
 OpenTofu
 Terragrunt
+Databricks CLI
+Exoscale CLI
 ```
 
 TypeScript is installed globally for type checking outside a project. A project that declares `typescript` in `package.json` uses its own version through package scripts or `npx`.
@@ -349,6 +486,12 @@ Update the host with:
 
 ```bash
 rpm-ostree upgrade
+```
+
+`rpm-ostree upgrade` does not update the local RPMs: `akmods-keys`, Slack, and Zoom. To update one, install the new RPM file and uninstall the old package in one transaction:
+
+```bash
+rpm-ostree install ./slack-*.rpm --uninstall slack
 ```
 
 ### Flatpak

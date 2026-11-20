@@ -223,6 +223,66 @@ url = "https://github.com/oven-sh/bun/releases/download/bun-v1.4.2/bun-windows-x
 checksum = "sha256:78c221c2376f79731ccf4e4af0b3bb46d81fefa3296c5abee09ad8a1b21e68c6"
 url = "https://github.com/oven-sh/bun/releases/download/bun-v1.4.2/bun-windows-x64-baseline.zip"
 
+[[tools.databricks-cli]]
+version = "1.27.0"
+backend = "aqua:databricks/cli"
+specifiers = ["latest"]
+
+[tools.databricks-cli."platforms.linux-arm64"]
+checksum = "sha256:0840d0c74a98a8c5bf2c41b49c5457cf9882ef1ac37095bcaba43b9585f4f656"
+url = "https://github.com/databricks/cli/releases/download/v1.27.0/databricks_cli_1.27.0_linux_arm64.tar.gz"
+url_api = "https://api.github.com/repos/databricks/cli/releases/assets/767107674"
+
+[tools.databricks-cli."platforms.linux-arm64-musl"]
+checksum = "sha256:0840d0c74a98a8c5bf2c41b49c5457cf9882ef1ac37095bcaba43b9585f4f656"
+url = "https://github.com/databricks/cli/releases/download/v1.27.0/databricks_cli_1.27.0_linux_arm64.tar.gz"
+url_api = "https://api.github.com/repos/databricks/cli/releases/assets/767107674"
+
+[tools.databricks-cli."platforms.linux-x64"]
+checksum = "sha256:9e80f9de62c38b29c128ef47a44a1d890cd3a9091407fdc5b10406133f0f15c5"
+url = "https://github.com/databricks/cli/releases/download/v1.27.0/databricks_cli_1.27.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/databricks/cli/releases/assets/767107630"
+
+[tools.databricks-cli."platforms.linux-x64-baseline"]
+checksum = "sha256:9e80f9de62c38b29c128ef47a44a1d890cd3a9091407fdc5b10406133f0f15c5"
+url = "https://github.com/databricks/cli/releases/download/v1.27.0/databricks_cli_1.27.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/databricks/cli/releases/assets/767107630"
+
+[tools.databricks-cli."platforms.linux-x64-musl"]
+checksum = "sha256:9e80f9de62c38b29c128ef47a44a1d890cd3a9091407fdc5b10406133f0f15c5"
+url = "https://github.com/databricks/cli/releases/download/v1.27.0/databricks_cli_1.27.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/databricks/cli/releases/assets/767107630"
+
+[tools.databricks-cli."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:9e80f9de62c38b29c128ef47a44a1d890cd3a9091407fdc5b10406133f0f15c5"
+url = "https://github.com/databricks/cli/releases/download/v1.27.0/databricks_cli_1.27.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/databricks/cli/releases/assets/767107630"
+
+[tools.databricks-cli."platforms.macos-arm64"]
+checksum = "sha256:0fe8a824985343f62a2fe39bcef2a4c5f3cbc7aadf231364c8b41b7ebaa162b4"
+url = "https://github.com/databricks/cli/releases/download/v1.27.0/databricks_cli_1.27.0_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/databricks/cli/releases/assets/767107590"
+
+[tools.databricks-cli."platforms.macos-x64"]
+checksum = "sha256:46367d365c1d9fb442162d3c19284c6012760d5f9e48eaedcb282cc60ced763a"
+url = "https://github.com/databricks/cli/releases/download/v1.27.0/databricks_cli_1.27.0_darwin_amd64.tar.gz"
+url_api = "https://api.github.com/repos/databricks/cli/releases/assets/767107592"
+
+[tools.databricks-cli."platforms.macos-x64-baseline"]
+checksum = "sha256:46367d365c1d9fb442162d3c19284c6012760d5f9e48eaedcb282cc60ced763a"
+url = "https://github.com/databricks/cli/releases/download/v1.27.0/databricks_cli_1.27.0_darwin_amd64.tar.gz"
+url_api = "https://api.github.com/repos/databricks/cli/releases/assets/767107592"
+
+[tools.databricks-cli."platforms.windows-x64"]
+checksum = "sha256:088311b6b01657e7a18034daa08c76edb8f3bceb2084bd80113790d81273523b"
+url = "https://github.com/databricks/cli/releases/download/v1.27.0/databricks_cli_1.27.0_windows_amd64.tar.gz"
+url_api = "https://api.github.com/repos/databricks/cli/releases/assets/767107694"
+
+[tools.databricks-cli."platforms.windows-x64-baseline"]
+checksum = "sha256:088311b6b01657e7a18034daa08c76edb8f3bceb2084bd80113790d81273523b"
+url = "https://github.com/databricks/cli/releases/download/v1.27.0/databricks_cli_1.27.0_windows_amd64.tar.gz"
+url_api = "https://api.github.com/repos/databricks/cli/releases/assets/767107694"
+
 [[tools.delta]]
 version = "0.19.2"
 backend = "aqua:dandavison/delta"
@@ -488,6 +548,66 @@ checksum = "sha256:bc6c814367b193cd8e713611d61e36013c0ef843b8f516458fe3eda039192
 url = "https://github.com/cli/cli/releases/download/v2.101.0/gh_2.101.0_windows_amd64.zip"
 url_api = "https://api.github.com/repos/cli/cli/releases/assets/565857681"
 provenance = "github-attestations"
+
+[[tools."github:exoscale/cli"]]
+version = "1.104.1"
+backend = "github:exoscale/cli"
+specifiers = ["latest"]
+
+[tools."github:exoscale/cli"."platforms.linux-arm64"]
+checksum = "sha256:ea6f3867fca12d315caff273dcb56df828a06a0afd447e18fc602ffadfef8c2b"
+url = "https://github.com/exoscale/cli/releases/download/v1.104.1/exoscale-cli_1.104.1_linux_arm64.tar.gz"
+url_api = "https://api.github.com/repos/exoscale/cli/releases/assets/727848325"
+
+[tools."github:exoscale/cli"."platforms.linux-arm64-musl"]
+checksum = "sha256:ea6f3867fca12d315caff273dcb56df828a06a0afd447e18fc602ffadfef8c2b"
+url = "https://github.com/exoscale/cli/releases/download/v1.104.1/exoscale-cli_1.104.1_linux_arm64.tar.gz"
+url_api = "https://api.github.com/repos/exoscale/cli/releases/assets/727848325"
+
+[tools."github:exoscale/cli"."platforms.linux-x64"]
+checksum = "sha256:79622e7c5b1594541704c6f34baf7a09da481ae5d7f79607df05b236617fa56d"
+url = "https://github.com/exoscale/cli/releases/download/v1.104.1/exoscale-cli_1.104.1_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/exoscale/cli/releases/assets/727848324"
+
+[tools."github:exoscale/cli"."platforms.linux-x64-baseline"]
+checksum = "sha256:79622e7c5b1594541704c6f34baf7a09da481ae5d7f79607df05b236617fa56d"
+url = "https://github.com/exoscale/cli/releases/download/v1.104.1/exoscale-cli_1.104.1_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/exoscale/cli/releases/assets/727848324"
+
+[tools."github:exoscale/cli"."platforms.linux-x64-musl"]
+checksum = "sha256:79622e7c5b1594541704c6f34baf7a09da481ae5d7f79607df05b236617fa56d"
+url = "https://github.com/exoscale/cli/releases/download/v1.104.1/exoscale-cli_1.104.1_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/exoscale/cli/releases/assets/727848324"
+
+[tools."github:exoscale/cli"."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:79622e7c5b1594541704c6f34baf7a09da481ae5d7f79607df05b236617fa56d"
+url = "https://github.com/exoscale/cli/releases/download/v1.104.1/exoscale-cli_1.104.1_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/exoscale/cli/releases/assets/727848324"
+
+[tools."github:exoscale/cli"."platforms.macos-arm64"]
+checksum = "sha256:e6b4f307dd14ca9ee77c67fc122e6b92abf81e5732b68b646db97edc919300b2"
+url = "https://github.com/exoscale/cli/releases/download/v1.104.1/exoscale-cli_1.104.1_darwin_all.tar.gz"
+url_api = "https://api.github.com/repos/exoscale/cli/releases/assets/727848408"
+
+[tools."github:exoscale/cli"."platforms.macos-x64"]
+checksum = "sha256:e6b4f307dd14ca9ee77c67fc122e6b92abf81e5732b68b646db97edc919300b2"
+url = "https://github.com/exoscale/cli/releases/download/v1.104.1/exoscale-cli_1.104.1_darwin_all.tar.gz"
+url_api = "https://api.github.com/repos/exoscale/cli/releases/assets/727848408"
+
+[tools."github:exoscale/cli"."platforms.macos-x64-baseline"]
+checksum = "sha256:e6b4f307dd14ca9ee77c67fc122e6b92abf81e5732b68b646db97edc919300b2"
+url = "https://github.com/exoscale/cli/releases/download/v1.104.1/exoscale-cli_1.104.1_darwin_all.tar.gz"
+url_api = "https://api.github.com/repos/exoscale/cli/releases/assets/727848408"
+
+[tools."github:exoscale/cli"."platforms.windows-x64"]
+checksum = "sha256:ca42f6b6ba30f4daf69db9a89b08702e842726a26c4c08df9af6afef9c103662"
+url = "https://github.com/exoscale/cli/releases/download/v1.104.1/exoscale-cli_1.104.1_windows_amd64.zip"
+url_api = "https://api.github.com/repos/exoscale/cli/releases/assets/727848406"
+
+[tools."github:exoscale/cli"."platforms.windows-x64-baseline"]
+checksum = "sha256:ca42f6b6ba30f4daf69db9a89b08702e842726a26c4c08df9af6afef9c103662"
+url = "https://github.com/exoscale/cli/releases/download/v1.104.1/exoscale-cli_1.104.1_windows_amd64.zip"
+url_api = "https://api.github.com/repos/exoscale/cli/releases/assets/727848406"
 
 [[tools.go]]
 version = "1.27.1"

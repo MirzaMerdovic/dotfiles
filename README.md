@@ -33,6 +33,7 @@ The repository includes configuration for:
 - Kitty
 - JetBrains Mono font
 - tmux
+- Ulauncher (settings, shortcuts, and autostart entry)
 - mise
 - Zed
 - shad (bash completion only)
@@ -170,7 +171,7 @@ Reboot.
 #### Layered packages
 
 ```bash
-rpm-ostree install akmod-nvidia xorg-x11-drv-nvidia-cuda netbird netbird-ui podman-compose tmux
+rpm-ostree install akmod-nvidia xorg-x11-drv-nvidia-cuda netbird netbird-ui podman-compose tmux ulauncher
 ```
 
 Slack and Zoom are local RPMs. Download them from <https://slack.com/downloads/linux> and <https://zoom.us/download?os=linux>, then install them:

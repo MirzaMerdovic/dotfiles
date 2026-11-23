@@ -369,12 +369,17 @@ Examples:
 
 ```bash
 gh auth login
-gh auth setup-git
+touch ~/.gitconfig
+GH_PATH="$HOME/.local/share/mise/shims/gh" gh auth setup-git
 
 az login
 
 pass-cli login
 ```
+
+`gh auth setup-git` writes a Git credential helper with `git config --global`. Git writes to `~/.gitconfig` when that file exists, and to `~/.config/git/config` when it does not. chezmoi manages `~/.config/git/config`, so `chezmoi apply` removes a helper written there. `touch` creates `~/.gitconfig` when it is not restored yet.
+
+The helper runs the gh executable at `GH_PATH`. Without `GH_PATH`, gh writes the path of its mise install directory, which contains the version: `~/.local/share/mise/installs/github-cli/<version>/`. Git authentication fails when mise removes that version after an upgrade. The mise shim path does not change across upgrades.
 
 Authenticate Claude Code and Codex separately using their supported login flows.
 
